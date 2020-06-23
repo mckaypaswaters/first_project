@@ -1,11 +1,11 @@
 require("dotenv").config();
 const express = require("express");
-// const massive = require('massive')
-const { SERVER_PORT, HOST, USER, PASSWORD, DATABASE } = process.env;
+const { SERVER_PORT, DBHOST, USER, PASSWORD, DATABASE } = process.env;
 const app = express();
+const userCtrl = require("./controllers/usersController");
 const mysql = require("mysql");
 const connection = mysql.createConnection({
-    host: HOST,
+    host: DBHOST,
     user: USER,
     password: PASSWORD,
     database: DATABASE,
@@ -20,6 +20,15 @@ connection.connect(function (err) {
 });
 
 app.use(express.json());
+
+app.get("/api/users", userCtrl.getAllUsers);
+
+app.get("/", function (req, res) {
+    connection.query("select * from users", function (error, results, fields) {
+        if (error) throw error;
+        res.end(JSON.stringify(results));
+    });
+});
 
 app.listen(SERVER_PORT, function () {
     console.log(`${SERVER_PORT} days until Halo 3 comes to PC.`);
